@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guess the Element</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <h1>Guess the Element</h1>
+    <p class="subtitle">Count the electron shells and electrons, then name the element.</p>
+
+    <canvas id="atomCanvas" width="480" height="480"></canvas>
+
+    <form id="guessForm" autocomplete="off">
+      <input id="guessInput" type="text" placeholder="Type element name or symbol..." autofocus>
+      <button type="submit">Guess</button>
+      <button type="button" id="skipBtn">Skip</button>
+      <button type="button" id="revealBtn">Reveal</button>
+    </form>
+
+    <p id="feedback" class="feedback"></p>
+    <p id="score" class="score">Score: 0 / 0</p>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
