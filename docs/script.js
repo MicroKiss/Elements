@@ -66,6 +66,14 @@ const feedback = document.getElementById("feedback");
 const scoreEl = document.getElementById("score");
 const skipBtn = document.getElementById("skipBtn");
 const revealBtn = document.getElementById("revealBtn");
+const gameTab = document.getElementById("gameTab");
+const settingsTab = document.getElementById("settingsTab");
+const gamePanel = document.getElementById("gamePanel");
+const settingsPanel = document.getElementById("settingsPanel");
+const rowCount = document.getElementById("rowCount");
+
+const ROW_END_ATOMIC_NUMBERS = [2, 10, 18, 36, 54];
+const savedRowCount = Number.parseInt(localStorage.getItem("elementRowCount"), 10);
 
 const state = {
   current: null,
@@ -73,13 +81,15 @@ const state = {
   attempts: 0,
   revealed: false,
   shellAngles: [],
+  rowCount: savedRowCount >= 1 && savedRowCount <= 5 ? savedRowCount : 5,
 };
 
 function pickElement(excludeNumber) {
+  const availableElements = ELEMENTS.slice(0, ROW_END_ATOMIC_NUMBERS[state.rowCount - 1]);
   let el;
   do {
-    el = ELEMENTS[Math.floor(Math.random() * ELEMENTS.length)];
-  } while (ELEMENTS.length > 1 && excludeNumber === el.number);
+    el = availableElements[Math.floor(Math.random() * availableElements.length)];
+  } while (availableElements.length > 1 && excludeNumber === el.number);
   return el;
 }
 
@@ -199,6 +209,28 @@ revealBtn.addEventListener("click", () => {
   feedback.textContent = `Answer: ${el.name} (${el.symbol})`;
   feedback.className = "feedback info";
   state.revealed = true;
+});
+
+function showTab(activeTab) {
+  const showGame = activeTab === gameTab;
+  gamePanel.hidden = !showGame;
+  settingsPanel.hidden = showGame;
+  gameTab.classList.toggle("active", showGame);
+  settingsTab.classList.toggle("active", !showGame);
+  gameTab.setAttribute("aria-selected", String(showGame));
+  settingsTab.setAttribute("aria-selected", String(!showGame));
+
+  if (showGame) guessInput.focus();
+}
+
+gameTab.addEventListener("click", () => showTab(gameTab));
+settingsTab.addEventListener("click", () => showTab(settingsTab));
+
+rowCount.value = String(state.rowCount);
+rowCount.addEventListener("change", () => {
+  state.rowCount = Number.parseInt(rowCount.value, 10);
+  localStorage.setItem("elementRowCount", String(state.rowCount));
+  newRound();
 });
 
 newRound();

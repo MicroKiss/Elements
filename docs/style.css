@@ -35,6 +35,37 @@ h1 {
   text-align: center;
 }
 
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  padding: 4px;
+  border: 1px solid #2a2f3d;
+  border-radius: 8px;
+  background: #10131b;
+}
+
+.tab {
+  min-width: 96px;
+  padding: 8px 14px;
+  background: transparent;
+  color: #a0a6b8;
+}
+
+.tab.active {
+  background: #2b3245;
+  color: #f0f0f0;
+}
+
+.tab-panel {
+  width: 100%;
+  text-align: center;
+}
+
+.tab-panel[hidden] {
+  display: none;
+}
+
 canvas {
   background: #05070c;
   border: 1px solid #2a2f3d;
@@ -114,4 +145,38 @@ button:hover {
   color: #a0a6b8;
   font-size: 0.9rem;
   margin: 0;
+}
+
+.settings-panel {
+  min-height: 480px;
+  padding-top: 48px;
+}
+
+.settings-panel h2 {
+  margin: 0 0 28px;
+  font-size: 1.35rem;
+}
+
+.settings-panel label {
+  display: block;
+  margin-bottom: 8px;
+  color: #d8dbe4;
+  font-weight: 600;
+}
+
+.settings-panel select {
+  width: min(100%, 320px);
+  padding: 10px 12px;
+  border: 1px solid #3a4360;
+  border-radius: 8px;
+  background: #161a24;
+  color: #f0f0f0;
+  font-size: 1rem;
+}
+
+.settings-panel p {
+  margin: 14px auto 0;
+  max-width: 340px;
+  color: #a0a6b8;
+  font-size: 0.9rem;
 }
