@@ -160,9 +160,9 @@ button:hover {
   padding: 4px 0 10px;
 }
 
-.blind-periodic-table {
+.blind-table-grid {
   display: grid;
-  grid-template-columns: repeat(18, minmax(38px, 1fr));
+  grid-template-columns: repeat(var(--group-count), minmax(38px, 1fr));
   gap: 5px;
   min-width: 770px;
 }
@@ -263,9 +263,9 @@ button:hover {
   padding: 4px 0 12px;
 }
 
-.periodic-table {
+.settings-table-grid {
   display: grid;
-  grid-template-columns: 42px repeat(18, minmax(44px, 1fr));
+  grid-template-columns: 42px repeat(var(--group-count), minmax(44px, 1fr));
   gap: 5px;
   min-width: 940px;
 }
@@ -356,12 +356,61 @@ button:hover {
 
 @media (max-width: 600px) {
   .app {
-    padding: 16px;
+    padding: 14px 12px 24px;
   }
 
   .settings-heading {
     align-items: start;
     flex-direction: column;
     gap: 6px;
+  }
+
+  .pinpoint-board,
+  .periodic-table-wrap {
+    overflow-x: visible;
+  }
+
+  .blind-table-grid {
+    grid-template-columns: repeat(var(--group-count), minmax(0, 1fr));
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .blind-periodic-table button {
+    height: 28px;
+    border-radius: 2px;
+    touch-action: manipulation;
+  }
+
+  .settings-table-grid {
+    grid-template-columns: 24px repeat(var(--group-count), minmax(0, 1fr));
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .periodic-table button {
+    height: 30px;
+    padding: 1px;
+    border-radius: 2px;
+    touch-action: manipulation;
+  }
+
+  .periodic-table .group-toggle,
+  .periodic-table .period-toggle {
+    height: 22px;
+    padding: 0;
+    font-size: 0.55rem;
+  }
+
+  .periodic-table .period-toggle {
+    width: 22px;
+  }
+
+  .element-toggle strong {
+    font-size: 0.62rem;
+  }
+
+  .element-toggle span {
+    display: none;
   }
 }

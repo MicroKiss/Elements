@@ -282,36 +282,46 @@ function createToggle(label, className, numbers) {
   return button;
 }
 
-function renderBlindPeriodicTable() {
-  blindPeriodicTable.replaceChildren();
+function createBlindTableGrid(startGroup, endGroup, className) {
+  const table = document.createElement("div");
+  table.className = `blind-table-grid ${className}`;
+  table.style.setProperty("--group-count", endGroup - startGroup + 1);
+
   PERIODS.forEach((period, periodIndex) => {
-    period.forEach((atomicNumber, groupIndex) => {
+    period.slice(startGroup - 1, endGroup).forEach((atomicNumber, groupOffset) => {
       if (!atomicNumber) {
         const gap = document.createElement("span");
         gap.className = "blind-gap";
-        blindPeriodicTable.append(gap);
+        table.append(gap);
         return;
       }
 
       const tile = document.createElement("button");
       tile.type = "button";
       tile.dataset.number = atomicNumber;
-      tile.setAttribute("aria-label", `Period ${periodIndex + 1}, group ${groupIndex + 1}`);
-      blindPeriodicTable.append(tile);
+      tile.setAttribute("aria-label", `Period ${periodIndex + 1}, group ${startGroup + groupOffset}`);
+      table.append(tile);
     });
   });
+  return table;
 }
 
-function renderPeriodicTable() {
-  periodicTable.replaceChildren();
-  periodicTable.append(createToggle("", "table-corner", []));
+function renderBlindPeriodicTable() {
+  blindPeriodicTable.replaceChildren(createBlindTableGrid(1, 18, ""));
+}
 
-  for (let group = 1; group <= 18; group++) {
+function createSettingsTableGrid(startGroup, endGroup, className) {
+  const table = document.createElement("div");
+  table.className = `settings-table-grid ${className}`;
+  table.style.setProperty("--group-count", endGroup - startGroup + 1);
+  table.append(createToggle("", "table-corner", []));
+
+  for (let group = startGroup; group <= endGroup; group++) {
     const groupNumbers = PERIODS.map((period) => period[group - 1]).filter(Boolean);
     const toggle = createToggle(String(group), "group-toggle", groupNumbers);
     toggle.title = `Toggle group ${group}`;
     toggle.setAttribute("aria-label", `Toggle group ${group}`);
-    periodicTable.append(toggle);
+    table.append(toggle);
   }
 
   PERIODS.forEach((period, periodIndex) => {
@@ -319,13 +329,13 @@ function renderPeriodicTable() {
     const periodToggle = createToggle(String(periodIndex + 1), "period-toggle", periodNumbers);
     periodToggle.title = `Toggle period ${periodIndex + 1}`;
     periodToggle.setAttribute("aria-label", `Toggle period ${periodIndex + 1}`);
-    periodicTable.append(periodToggle);
+    table.append(periodToggle);
 
-    period.forEach((atomicNumber) => {
+    period.slice(startGroup - 1, endGroup).forEach((atomicNumber) => {
       if (!atomicNumber) {
         const gap = document.createElement("span");
         gap.className = "element-gap";
-        periodicTable.append(gap);
+        table.append(gap);
         return;
       }
 
@@ -338,9 +348,15 @@ function renderPeriodicTable() {
       const symbol = document.createElement("strong");
       symbol.textContent = element.symbol;
       tile.replaceChildren(number, symbol);
-      periodicTable.append(tile);
+      table.append(tile);
     });
   });
+
+  return table;
+}
+
+function renderPeriodicTable() {
+  periodicTable.replaceChildren(createSettingsTableGrid(1, 18, ""));
 
   updatePeriodicTable();
 }
