@@ -17,9 +17,50 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 24px;
+  padding: 24px 24px 82px;
   width: 100%;
   max-width: 1120px;
+}
+
+.site-footer {
+  position: fixed;
+  right: 16px;
+  bottom: 14px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 7px 6px 12px;
+  border: 1px solid #2a2f3d;
+  border-radius: 8px;
+  background: rgba(10, 12, 18, 0.94);
+  color: #8992a5;
+  font-size: 0.78rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+.site-footer a {
+  color: #c9d7ee;
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.site-footer .support-link {
+  padding: 7px 11px;
+  border-radius: 6px;
+  background: #ffd166;
+  color: #211c10;
+  font-weight: 700;
+}
+
+.site-footer .support-link:hover {
+  background: #ffe099;
+  color: #211c10;
+  text-decoration: none;
 }
 
 h1 {
@@ -356,7 +397,14 @@ button:hover {
 
 @media (max-width: 600px) {
   .app {
-    padding: 14px 12px 24px;
+    padding: 14px 12px 76px;
+  }
+
+  .site-footer {
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    justify-content: space-between;
   }
 
   .settings-heading {
