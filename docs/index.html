@@ -35,16 +35,17 @@
     </main>
 
     <section id="settingsPanel" class="tab-panel settings-panel" role="tabpanel" aria-labelledby="settingsTab" hidden>
-      <h2>Game settings</h2>
-      <label for="rowCount">Periodic table rows</label>
-      <select id="rowCount">
-        <option value="1">1 row (Hydrogen-Helium)</option>
-        <option value="2">2 rows (Hydrogen-Neon)</option>
-        <option value="3">3 rows (Hydrogen-Argon)</option>
-        <option value="4">4 rows (Hydrogen-Krypton)</option>
-        <option value="5">5 rows (Hydrogen-Xenon)</option>
-      </select>
-      <p>Only elements from the selected rows will appear in the game.</p>
+      <div class="settings-heading">
+        <div>
+          <h2>Element pool</h2>
+          <p>Choose the elements that can appear in the game.</p>
+        </div>
+        <strong id="selectionCount"></strong>
+      </div>
+      <div class="periodic-table-wrap">
+        <div id="periodicTable" class="periodic-table" aria-label="Element selection"></div>
+      </div>
+      <p id="selectionMessage" class="selection-message" role="status"></p>
     </section>
   </div>
 

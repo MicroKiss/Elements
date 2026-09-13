@@ -70,10 +70,32 @@ const gameTab = document.getElementById("gameTab");
 const settingsTab = document.getElementById("settingsTab");
 const gamePanel = document.getElementById("gamePanel");
 const settingsPanel = document.getElementById("settingsPanel");
-const rowCount = document.getElementById("rowCount");
+const periodicTable = document.getElementById("periodicTable");
+const selectionCount = document.getElementById("selectionCount");
+const selectionMessage = document.getElementById("selectionMessage");
 
 const ROW_END_ATOMIC_NUMBERS = [2, 10, 18, 36, 54];
 const savedRowCount = Number.parseInt(localStorage.getItem("elementRowCount"), 10);
+const PERIODS = [
+  [1, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 2],
+  [3, 4, null, null, null, null, null, null, null, null, null, null, 5, 6, 7, 8, 9, 10],
+  [11, 12, null, null, null, null, null, null, null, null, null, null, 13, 14, 15, 16, 17, 18],
+  Array.from({ length: 18 }, (_, index) => index + 19),
+  Array.from({ length: 18 }, (_, index) => index + 37),
+];
+
+function loadSelectedElements() {
+  try {
+    const saved = JSON.parse(localStorage.getItem("selectedElements"));
+    const valid = saved.filter((number) => Number.isInteger(number) && number >= 1 && number <= ELEMENTS.length);
+    if (valid.length) return new Set(valid);
+  } catch {
+    // Fall back to the previous row setting or all available elements.
+  }
+
+  const rowLimit = savedRowCount >= 1 && savedRowCount <= 5 ? ROW_END_ATOMIC_NUMBERS[savedRowCount - 1] : ELEMENTS.length;
+  return new Set(ELEMENTS.slice(0, rowLimit).map((element) => element.number));
+}
 
 const state = {
   current: null,
@@ -81,11 +103,11 @@ const state = {
   attempts: 0,
   revealed: false,
   shellAngles: [],
-  rowCount: savedRowCount >= 1 && savedRowCount <= 5 ? savedRowCount : 5,
+  selectedElements: loadSelectedElements(),
 };
 
 function pickElement(excludeNumber) {
-  const availableElements = ELEMENTS.slice(0, ROW_END_ATOMIC_NUMBERS[state.rowCount - 1]);
+  const availableElements = ELEMENTS.filter((element) => state.selectedElements.has(element.number));
   let el;
   do {
     el = availableElements[Math.floor(Math.random() * availableElements.length)];
@@ -226,12 +248,92 @@ function showTab(activeTab) {
 gameTab.addEventListener("click", () => showTab(gameTab));
 settingsTab.addEventListener("click", () => showTab(settingsTab));
 
-rowCount.value = String(state.rowCount);
-rowCount.addEventListener("change", () => {
-  state.rowCount = Number.parseInt(rowCount.value, 10);
-  localStorage.setItem("elementRowCount", String(state.rowCount));
+function createToggle(label, className, numbers) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = className;
+  button.textContent = label;
+  button.dataset.elements = numbers.join(",");
+  return button;
+}
+
+function renderPeriodicTable() {
+  periodicTable.replaceChildren();
+  periodicTable.append(createToggle("", "table-corner", []));
+
+  for (let group = 1; group <= 18; group++) {
+    const groupNumbers = PERIODS.map((period) => period[group - 1]).filter(Boolean);
+    const toggle = createToggle(String(group), "group-toggle", groupNumbers);
+    toggle.title = `Toggle group ${group}`;
+    toggle.setAttribute("aria-label", `Toggle group ${group}`);
+    periodicTable.append(toggle);
+  }
+
+  PERIODS.forEach((period, periodIndex) => {
+    const periodNumbers = period.filter(Boolean);
+    const periodToggle = createToggle(String(periodIndex + 1), "period-toggle", periodNumbers);
+    periodToggle.title = `Toggle period ${periodIndex + 1}`;
+    periodToggle.setAttribute("aria-label", `Toggle period ${periodIndex + 1}`);
+    periodicTable.append(periodToggle);
+
+    period.forEach((atomicNumber) => {
+      if (!atomicNumber) {
+        const gap = document.createElement("span");
+        gap.className = "element-gap";
+        periodicTable.append(gap);
+        return;
+      }
+
+      const element = ELEMENTS[atomicNumber - 1];
+      const tile = createToggle(element.symbol, "element-toggle", [atomicNumber]);
+      tile.title = element.name;
+      tile.setAttribute("aria-label", `${element.name}, atomic number ${atomicNumber}`);
+      const number = document.createElement("span");
+      number.textContent = atomicNumber;
+      const symbol = document.createElement("strong");
+      symbol.textContent = element.symbol;
+      tile.replaceChildren(number, symbol);
+      periodicTable.append(tile);
+    });
+  });
+
+  updatePeriodicTable();
+}
+
+function updatePeriodicTable() {
+  periodicTable.querySelectorAll("button[data-elements]").forEach((button) => {
+    const numbers = button.dataset.elements.split(",").filter(Boolean).map(Number);
+    const selected = numbers.filter((number) => state.selectedElements.has(number)).length;
+    button.classList.toggle("selected", selected === numbers.length);
+    button.classList.toggle("partial", selected > 0 && selected < numbers.length);
+    button.setAttribute("aria-pressed", String(selected === numbers.length));
+  });
+  selectionCount.textContent = `${state.selectedElements.size} of ${ELEMENTS.length} selected`;
+}
+
+periodicTable.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-elements]");
+  if (!button) return;
+
+  const numbers = button.dataset.elements.split(",").map(Number);
+  const allSelected = numbers.every((number) => state.selectedElements.has(number));
+  const selectedInGroup = numbers.filter((number) => state.selectedElements.has(number)).length;
+
+  if (allSelected && state.selectedElements.size === selectedInGroup) {
+    selectionMessage.textContent = "At least one element must remain selected.";
+    return;
+  }
+
+  numbers.forEach((number) => {
+    if (allSelected) state.selectedElements.delete(number);
+    else state.selectedElements.add(number);
+  });
+  selectionMessage.textContent = "";
+  localStorage.setItem("selectedElements", JSON.stringify([...state.selectedElements]));
+  updatePeriodicTable();
   newRound();
 });
 
+renderPeriodicTable();
 newRound();
 animate();
