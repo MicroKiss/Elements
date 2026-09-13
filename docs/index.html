@@ -26,9 +26,18 @@
       <form id="guessForm" autocomplete="off">
         <input id="guessInput" type="text" placeholder="Type element name or symbol..." autofocus>
         <button type="submit">Guess</button>
+      </form>
+
+      <div class="answer-divider"><span>Or</span></div>
+
+      <div id="pinpointBoard" class="pinpoint-board">
+        <div id="blindPeriodicTable" class="blind-periodic-table" aria-label="Blind periodic table"></div>
+      </div>
+
+      <div class="round-actions">
         <button type="button" id="skipBtn">Skip</button>
         <button type="button" id="revealBtn">Reveal</button>
-      </form>
+      </div>
 
       <p id="feedback" class="feedback"></p>
       <p id="score" class="score">Score: 0 / 0</p>

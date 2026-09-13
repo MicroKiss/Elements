@@ -73,6 +73,7 @@ const settingsPanel = document.getElementById("settingsPanel");
 const periodicTable = document.getElementById("periodicTable");
 const selectionCount = document.getElementById("selectionCount");
 const selectionMessage = document.getElementById("selectionMessage");
+const blindPeriodicTable = document.getElementById("blindPeriodicTable");
 
 const ROW_END_ATOMIC_NUMBERS = [2, 10, 18, 36, 54];
 const savedRowCount = Number.parseInt(localStorage.getItem("elementRowCount"), 10);
@@ -102,6 +103,7 @@ const state = {
   score: 0,
   attempts: 0,
   revealed: false,
+  completed: false,
   shellAngles: [],
   selectedElements: loadSelectedElements(),
 };
@@ -118,11 +120,16 @@ function pickElement(excludeNumber) {
 function newRound() {
   state.current = pickElement(state.current ? state.current.number : null);
   state.revealed = false;
+  state.completed = false;
   state.shellAngles = state.current.shells.map(() => Math.random() * Math.PI * 2);
   feedback.textContent = "";
   feedback.className = "feedback";
   guessInput.value = "";
-  guessInput.focus();
+  blindPeriodicTable.querySelectorAll("button").forEach((button) => {
+    button.classList.remove("wrong", "correct", "revealed");
+    button.disabled = false;
+  });
+  if (!gamePanel.hidden) guessInput.focus();
 }
 
 function drawAtom() {
@@ -190,17 +197,16 @@ function normalize(str) {
   return str.trim().toLowerCase();
 }
 
-function checkGuess(raw) {
-  const guess = normalize(raw);
-  if (!guess) return;
-
+function recordGuess(isCorrect) {
   const el = state.current;
-  const isCorrect = guess === normalize(el.name) || guess === normalize(el.symbol);
-
   state.attempts++;
 
   if (isCorrect) {
     state.score++;
+    state.completed = true;
+    blindPeriodicTable.querySelectorAll("button").forEach((button) => {
+      button.disabled = true;
+    });
     feedback.textContent = `Correct! It was ${el.name} (${el.symbol}).`;
     feedback.className = "feedback correct";
     updateScore();
@@ -212,14 +218,31 @@ function checkGuess(raw) {
   }
 }
 
+function checkGuess(raw) {
+  const guess = normalize(raw);
+  if (!guess) return;
+
+  const el = state.current;
+  recordGuess(guess === normalize(el.name) || guess === normalize(el.symbol));
+}
+
 function updateScore() {
   scoreEl.textContent = `Score: ${state.score} / ${state.attempts}`;
 }
 
 guessForm.addEventListener("submit", (e) => {
   e.preventDefault();
-  if (state.revealed) return;
+  if (state.revealed || state.completed) return;
   checkGuess(guessInput.value);
+});
+
+blindPeriodicTable.addEventListener("click", (event) => {
+  const tile = event.target.closest("button[data-number]");
+  if (!tile || state.revealed || state.completed) return;
+
+  const isCorrect = Number(tile.dataset.number) === state.current.number;
+  tile.classList.add(isCorrect ? "correct" : "wrong");
+  recordGuess(isCorrect);
 });
 
 skipBtn.addEventListener("click", () => {
@@ -231,6 +254,8 @@ revealBtn.addEventListener("click", () => {
   feedback.textContent = `Answer: ${el.name} (${el.symbol})`;
   feedback.className = "feedback info";
   state.revealed = true;
+  const answerTile = blindPeriodicTable.querySelector(`[data-number="${el.number}"]`);
+  answerTile.classList.add("revealed");
 });
 
 function showTab(activeTab) {
@@ -255,6 +280,26 @@ function createToggle(label, className, numbers) {
   button.textContent = label;
   button.dataset.elements = numbers.join(",");
   return button;
+}
+
+function renderBlindPeriodicTable() {
+  blindPeriodicTable.replaceChildren();
+  PERIODS.forEach((period, periodIndex) => {
+    period.forEach((atomicNumber, groupIndex) => {
+      if (!atomicNumber) {
+        const gap = document.createElement("span");
+        gap.className = "blind-gap";
+        blindPeriodicTable.append(gap);
+        return;
+      }
+
+      const tile = document.createElement("button");
+      tile.type = "button";
+      tile.dataset.number = atomicNumber;
+      tile.setAttribute("aria-label", `Period ${periodIndex + 1}, group ${groupIndex + 1}`);
+      blindPeriodicTable.append(tile);
+    });
+  });
 }
 
 function renderPeriodicTable() {
@@ -335,5 +380,6 @@ periodicTable.addEventListener("click", (event) => {
 });
 
 renderPeriodicTable();
+renderBlindPeriodicTable();
 newRound();
 animate();
